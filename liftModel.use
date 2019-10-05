@@ -6,6 +6,7 @@ model LiftSystem
 -- Classes
 
 enum FloorButtonDirection {up, down}
+enum Movement {upward, downward, idle}
 
 class Floor
 attributes
@@ -18,6 +19,8 @@ class Lift
 attributes
     level : Integer
     doorsClosed : Boolean
+    jobMovement: Movement
+    physicalMovement: Movement
 operations
     pressButton(_floor : Floor)
 end
@@ -30,3 +33,8 @@ association HasJobs between
 end
 
 -- Constraints
+
+constraints
+
+context Lift inv:
+    not(self.physicalMovement=Movement::idle)implies(self.doorsClosed=true)
