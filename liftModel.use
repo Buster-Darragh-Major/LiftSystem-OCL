@@ -1,0 +1,32 @@
+-- Project Lift System SOFTENG 751 - 5/10/2019
+-- Written by Buster Major and Nathan Cairns
+
+model LiftSystem
+
+-- Classes
+
+enum FloorButtonDirection {up, down}
+
+class Floor
+attributes
+    level : Integer
+operations
+    pressButton(direction : FloorButtonDirection)
+end
+
+class Lift
+attributes
+    level : Integer
+    doorsClosed : Boolean
+operations
+    pressButton(_floor : Floor)
+end
+
+-- Associations
+
+association HasJobs between
+    Lift[*] role lift
+    Floor[*] role jobs
+end
+
+-- Constraints
