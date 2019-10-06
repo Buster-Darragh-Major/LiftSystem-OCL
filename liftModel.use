@@ -11,6 +11,7 @@ enum Movement {upward, downward, idle}
 class Floor
 attributes
     level : Integer
+    label : String
 operations
     pressButton(direction : FloorButtonDirection)
 end
@@ -21,20 +22,43 @@ attributes
     doorsClosed : Boolean
     jobMovement: Movement
     physicalMovement: Movement
+    buttons : Set(String)
 operations
-    pressButton(_floor : Floor)
+    pressButton(label : String)
 end
 
 -- Associations
 
 association HasJobs between
-    Lift[*] role lift
-    Floor[*] role jobs
+    Lift[0..*] role liftWithJobs
+    Floor[0..*] role job
+end
+
+association CanGoToFloor between
+    Lift[0..*] role lift
+    Floor[0..*] role floorOptions
+end
+
+association CanCallLift between
+    Floor[0..*] role _floor
+    Lift[0..*] role liftOptions
 end
 
 -- Constraints
 
 constraints
 
-context Lift inv:
-    not(self.physicalMovement=Movement::idle)implies(self.doorsClosed=true)
+context Lift
+    inv doorsMustBeClosedToMove:
+        not(self.physicalMovement=Movement::idle)implies(self.doorsClosed=true)
+
+-- TODO: what appends when you press a lift button
+-- TODO: what happens when you press a floor button
+-- TODO: close door function
+-- TODO: 'tick' operation (per lift)?
+-- TODO: lift failure? lift taken out of service so remove from all floors options
+
+
+--context Lift::pressButton(label : String)
+--    post floorMustExistWithLabel:
+--    post inJobs: job->includes(_floor)
