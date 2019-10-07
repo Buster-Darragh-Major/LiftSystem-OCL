@@ -12,6 +12,7 @@ class Building
 attributes
     fireAlarm : Boolean
 operations
+    liftTick()
     engageFireAlarm()
     disengageFireAlarm()
 end
@@ -42,6 +43,8 @@ operations
     engageEmergencyBreak()
     unlockDoor()
     unlockMovement()
+    nextJob() : Floor
+    distanceToJob() : Integer
 end
 
 ---- ASSOCIATIONS ----
@@ -209,3 +212,20 @@ context Building::disengageFireAlarm()
     post fireAlarmIsOff : fireAlarm=false
     post allLiftsUnlocked :
         liftsInBuilding->forAll(lift : Lift | lift.movementLocked=false)
+
+-- Helper methods
+
+context Lift::nextJob() : Floor
+    post movingUpSoNextSmallest: (self.jobMovement=Movement::upward)implies(
+        jobs->select(floor1 : Floor |
+            not(jobs->exists(floor2 : Floor | floor1.level > floor2.level))
+        )->includes(result)
+    )
+    post movingDownSoNextLargest: (self.jobMovement=Movement::downward)implies(
+        jobs->select(floor1 : Floor |
+            not(jobs->exists(floor2 : Floor | floor1.level < floor2.level))
+        )->includes(result)
+    )
+
+--context Lift::distanceToJob() : Integer
+--    post result = self.
