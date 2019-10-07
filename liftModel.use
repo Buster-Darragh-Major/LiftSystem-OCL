@@ -115,18 +115,17 @@ context Building
 context Floor::pressFloorButton(direction : FloorButtonDirection)
     pre buttonIsOnFloor: buttons->includes(direction)
     post addJobToClosestUpwardsMovingLift:
-        let liftsMovingUp:Set(Lift) = liftOptions->select(lift : Lift | lift.jobMovement=Movement::upward),
-            liftsBelow:Set(Lift) = liftOptions->select(lift : Lift | lift.level <= self.level),
-            idleLifts:Set(Lift) = liftOptions->select(lift : Lift | lift.jobMovement=Movement::idle)
+        let shortlistLifts = (liftOptions->select(lift : Lift | lift.jobMovement=Movement::upward) -- Lifts moving up
+                ->intersection(liftOptions->select(lift : Lift | lift.level <= self.level))) -- Lifts below
+                ->union(liftOptions->select(lift : Lift | lift.jobMovement=Movement::idle)) -- Idle lifts
         in
-        (direction=Movement::upward)
+        (direction=FloorButtonDirection::up)
         implies
-            ((liftsMovingUp->intersection(liftsBelow))->union(idleLifts)=Set{})implies(self.waitingFor=Movement::upward) and
-            ((liftsMovingUp->intersection(liftsBelow))->union(idleLifts)<>Set{})implies(((liftsMovingUp->intersection(liftsBelow))->union(idleLifts)->any(lift1 : Lift |
-                    not((liftsMovingUp->intersection(liftsBelow))->union(idleLifts)->exists(lift2 : Lift | (lift2.level - level).abs() < (lift1.level - level).abs()))))
-                .jobs->includes(self))
-
--- Need job queue in floors that lifts all read after tick if empty
+            (shortlistLifts->isEmpty())implies(self.waitingFor=Movement::upward) and
+            (not(shortlistLifts->isEmpty()))implies(liftOptions->exists(lift1 : Lift |
+                shortlistLifts->includes(lift1) and
+                not(shortlistLifts->exists(lift2 : Lift | (lift2.level - level).abs() < (lift1.level - level).abs())) and
+                lift1.jobs->includes(self)))
 
 -- Lift button actions
 
