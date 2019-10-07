@@ -141,10 +141,10 @@ context Floor::pressFloorButton(direction : FloorButtonDirection)
                     not(shortlistLifts->exists(
                         lift2 : Lift | (lift2.level - level).abs() < (lift1.level - level).abs()
                     )) and
-                lift1.jobs->includes(self)
-            )
-        )) and
-        ((shortlistLifts->isEmpty())implies(self.waitingFor=Movement::downward))
+                    lift1.jobs->includes(self)
+                )
+            )) and
+            ((shortlistLifts->isEmpty())implies(self.waitingFor=Movement::downward))
 
 -- Lift button actions
 
