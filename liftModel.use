@@ -21,6 +21,7 @@ attributes
     level : Integer
     label : String
     buttons: Set(FloorButtonDirection)
+    waitingFor: Movement
 operations
     pressFloorButton(direction : FloorButtonDirection)
 end
@@ -108,6 +109,26 @@ context Building
 -- TODO: lift failure? lift taken out of service so remove from all floors options
 
 ---- METHODS ----
+
+-- Floor button actions
+
+context Floor::pressFloorButton(direction : FloorButtonDirection)
+    pre buttonIsOnFloor: buttons->includes(direction)
+    post addJobToClosestUpwardsMovingLift:
+        let liftsMovingUp:Set(Lift) = liftOptions->select(lift : Lift | lift.jobMovement=Movement::upward),
+            liftsBelow:Set(Lift) = liftOptions->select(lift : Lift | lift.level <= self.level),
+            idleLifts:Set(Lift) = liftOptions->select(lift : Lift | lift.jobMovement=Movement::idle)
+        in
+        (direction=Movement::upward)
+        implies
+            ((liftsMovingUp->intersection(liftsBelow))->union(idleLifts)=Set{})implies(self.waitingFor=Movement::upward) and
+            ((liftsMovingUp->intersection(liftsBelow))->union(idleLifts)<>Set{})implies(((liftsMovingUp->intersection(liftsBelow))->union(idleLifts)->any(lift1 : Lift |
+                    not((liftsMovingUp->intersection(liftsBelow))->union(idleLifts)->exists(lift2 : Lift | (lift2.level - level).abs() < (lift1.level - level).abs()))))
+                .jobs->includes(self))
+
+-- Need job queue in floors that lifts all read after tick if empty
+
+-- Lift button actions
 
 context Lift::pressLiftButton(label : String)
     pre floorLabelExists: floorOptions->exists(_floor : Floor | _floor.label = label)
