@@ -8,10 +8,15 @@ model LiftSystem
 enum FloorButtonDirection {up, down}
 enum Movement {upward, downward, idle}
 
+class Building
+operations
+end
+
 class Floor
 attributes
     level : Integer
     label : String
+    buttons: Set(FloorButtonDirection)
 operations
     pressFloorButton(direction : FloorButtonDirection)
 end
@@ -29,6 +34,8 @@ operations
     closeDoor()
 end
 
+-- Associations
+
 association CanGoToFloor between
     Lift[0..*] role lift
     Floor[0..*] role floorOptions
@@ -39,19 +46,52 @@ association CanCallLift between
     Lift[0..*] role liftOptions
 end
 
+association Floors between
+    Building[1] role buildingFloorOwner
+    Floor[2..*] role floorsInBuilding
+end
+
+association Lifts between
+    Building[1] role buildingLiftOwner
+    Lift[1..*] role liftsInBuilding
+end
+
 -- Constraints
 
 constraints
 
+-- Invariants
+
 context Lift
     inv doorsMustBeClosedToMove:
-        not(self.physicalMovement=Movement::idle)implies(self.doorsClosed=true)
+        not(physicalMovement=Movement::idle)implies(doorsClosed=true)
 
--- TODO: what appends when you press a lift button
+context Building
+    inv topLevelCanOnlyGoDown:
+        floorsInBuilding->forAll(floor1 : Floor |
+            not(floorsInBuilding->exists(floor2 : Floor | floor2.level > floor1.level))
+            implies
+            (floor1.buttons=Set{FloorButtonDirection::down}))
+    inv bottomLevelCanOnlyGoUP:
+        floorsInBuilding->forAll(floor1 : Floor |
+            not(floorsInBuilding->exists(floor2 : Floor | floor2.level < floor1.level))
+            implies
+            (floor1.buttons=Set{FloorButtonDirection::up}))
+    inv middleFloorCanGoUpAndDown:
+        floorsInBuilding->forAll(floor1 : Floor |
+            (floorsInBuilding->exists(floor2 : Floor | floor2.level > floor1.level)
+                and floorsInBuilding->exists(floor3 : Floor | floor3.level < floor1.level))
+            implies
+            (floor1.buttons=Set{FloorButtonDirection::down, FloorButtonDirection::up}))
+
 -- TODO: what happens when you press a floor button
--- TODO: close door function
 -- TODO: 'tick' operation (per lift)?
+-- v nice to haves v
 -- TODO: lift failure? lift taken out of service so remove from all floors options
+-- TODO: Emergency break button - stop on current floor and lock door.
+-- TODO: Fire alarm - same as emergency break but can open door - could do across all lifts - need a building object or something
+
+-- Methods
 
 context Lift::pressLiftButton(label : String)
     pre floorLabelExists: floorOptions->exists(_floor : Floor | _floor.label = label)
