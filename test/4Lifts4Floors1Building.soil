@@ -86,3 +86,12 @@
 !Floor1.waitingFor := Movement::idle
 !Floor2.waitingFor := Movement::idle
 !Floor3.waitingFor := Movement::idle
+!new Building
+!insert (Building1,Lift4) into Lifts
+!insert (Building1,Lift2) into Lifts
+!insert (Building1,Lift1) into Lifts
+!insert (Building1,Lift3) into Lifts
+!insert (Building1,Floor2) into Floors
+!insert (Building1,Floor1) into Floors
+!insert (Building1,Floor3) into Floors
+!insert (Building1,Floor4) into Floors
