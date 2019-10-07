@@ -3,7 +3,7 @@
 
 model LiftSystem
 
--- Classes
+---- CLASSES ----
 
 enum FloorButtonDirection {up, down}
 enum Movement {upward, downward, idle}
@@ -43,7 +43,7 @@ operations
     unlockMovement()
 end
 
--- Associations
+---- ASSOCIATIONS ----
 
 association CanGoToFloor between
     Lift[0..*] role lift
@@ -65,11 +65,9 @@ association Lifts between
     Lift[1..*] role liftsInBuilding
 end
 
--- Constraints
-
 constraints
 
--- Invariants
+---- INVARIANTS ----
 
 context Lift
     inv doorsMustBeClosedToMove:
@@ -109,7 +107,7 @@ context Building
 -- v nice to haves v
 -- TODO: lift failure? lift taken out of service so remove from all floors options
 
--- Methods
+---- METHODS ----
 
 context Lift::pressLiftButton(label : String)
     pre floorLabelExists: floorOptions->exists(_floor : Floor | _floor.label = label)
@@ -139,6 +137,8 @@ context Lift::openDoor()
 
 context Lift::closeDoor()
     post openDoor: doorsClosed=true
+
+-- Emergency methods
 
 context Lift::engageEmergencyBreak()
     post liftIsStopped : jobMovement=Movement::idle and physicalMovement=Movement::idle and jobs=Set{}
