@@ -123,8 +123,8 @@ context Floor::pressFloorButton(direction : FloorButtonDirection)
             ((not(shortlistLifts->isEmpty()))implies(
                 liftOptions->exists(lift1 : Lift | shortlistLifts->includes(lift1) and
                     not(shortlistLifts->exists(
-                        lift2 : Lift | (lift2.level - level).abs() < (lift1.level - level).abs())
-                    ) and
+                        lift2 : Lift | (lift2.level - level).abs() < (lift1.level - level).abs()
+                    )) and
                     lift1.jobs->includes(self)
                 )
             )) and
@@ -139,8 +139,8 @@ context Floor::pressFloorButton(direction : FloorButtonDirection)
             ((not(shortlistLifts->isEmpty()))implies(
                 liftOptions->exists(lift1 : Lift | shortlistLifts->includes(lift1) and
                     not(shortlistLifts->exists(
-                        lift2 : Lift | (lift2.level - level).abs() < (lift1.level - level).abs())
-                    ) and
+                        lift2 : Lift | (lift2.level - level).abs() < (lift1.level - level).abs()
+                    )) and
                 lift1.jobs->includes(self)
             )
         )) and
