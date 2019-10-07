@@ -103,7 +103,6 @@ context Building
             (floor1.buttons=Set{FloorButtonDirection::down, FloorButtonDirection::up})
         )
 
--- TODO: what happens when you press a floor button
 -- TODO: 'tick' operation (per lift)?
 -- v nice to haves v
 -- TODO: lift failure? lift taken out of service so remove from all floors options
