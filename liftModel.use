@@ -114,18 +114,31 @@ context Building
 
 context Floor::pressFloorButton(direction : FloorButtonDirection)
     pre buttonIsOnFloor: buttons->includes(direction)
-    post addJobToClosestUpwardsMovingLift:
-        let shortlistLifts = (liftOptions->select(lift : Lift | lift.jobMovement=Movement::upward) -- Lifts moving up
+    post movingUpSoAddJobToClosestUpwardsMovingLift:
+        let shortlistLifts:Set(Lift) = (liftOptions->select(lift : Lift | lift.jobMovement=Movement::upward) -- Lifts moving up
                 ->intersection(liftOptions->select(lift : Lift | lift.level <= self.level))) -- Lifts below
                 ->union(liftOptions->select(lift : Lift | lift.jobMovement=Movement::idle)) -- Idle lifts
         in
         (direction=FloorButtonDirection::up)
         implies
-            (shortlistLifts->isEmpty())implies(self.waitingFor=Movement::upward) and
-            (not(shortlistLifts->isEmpty()))implies(liftOptions->exists(lift1 : Lift |
+            ((not(shortlistLifts->isEmpty()))implies(liftOptions->exists(lift1 : Lift |
                 shortlistLifts->includes(lift1) and
                 not(shortlistLifts->exists(lift2 : Lift | (lift2.level - level).abs() < (lift1.level - level).abs())) and
-                lift1.jobs->includes(self)))
+                lift1.jobs->includes(self)))) and
+            ((shortlistLifts->isEmpty())implies(self.waitingFor=Movement::upward))
+
+    post movingDownSoAddJobToClosestDownwardMovingLift:
+        let shortlistLifts:Set(Lift) = (liftOptions->select(lift : Lift | lift.jobMovement=Movement::downward) -- Lifts moving down
+                ->intersection(liftOptions->select(lift : Lift | lift.level >= self.level))) -- Lifts above
+                ->union(liftOptions->select(lift : Lift | lift.jobMovement=Movement::idle)) -- Idle lifts
+        in
+        (direction=FloorButtonDirection::down)
+        implies
+            ((not(shortlistLifts->isEmpty()))implies(liftOptions->exists(lift1 : Lift |
+                shortlistLifts->includes(lift1) and
+                not(shortlistLifts->exists(lift2 : Lift | (lift2.level - level).abs() < (lift1.level - level).abs())) and
+                lift1.jobs->includes(self)))) and
+            ((shortlistLifts->isEmpty())implies(self.waitingFor=Movement::downward))
 
 -- Lift button actions
 
