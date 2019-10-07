@@ -25,13 +25,16 @@ class Lift
 attributes
     level : Integer
     doorsClosed : Boolean
-    jobMovement: Movement
-    physicalMovement: Movement
-    jobs: Set(Floor)
+    jobMovement : Movement
+    physicalMovement : Movement
+    jobs : Set(Floor)
+    lockDoor : Boolean
 operations
     pressLiftButton(label : String)
     openDoor()
     closeDoor()
+    engageEmergencyBreak()
+    unlockDoor()
 end
 
 -- Associations
@@ -65,6 +68,8 @@ constraints
 context Lift
     inv doorsMustBeClosedToMove:
         not(physicalMovement=Movement::idle)implies(doorsClosed=true)
+    inv lockedDoorCantOpen:
+        (lockDoor)implies(doorsClosed=true)
 
 context Building
     inv topLevelCanOnlyGoDown:
@@ -88,7 +93,6 @@ context Building
 -- TODO: 'tick' operation (per lift)?
 -- v nice to haves v
 -- TODO: lift failure? lift taken out of service so remove from all floors options
--- TODO: Emergency break button - stop on current floor and lock door.
 -- TODO: Fire alarm - same as emergency break but can open door - could do across all lifts - need a building object or something
 
 -- Methods
@@ -120,3 +124,11 @@ context Lift::openDoor()
 
 context Lift::closeDoor()
     post openDoor: doorsClosed=true
+
+context Lift::engageEmergencyBreak()
+    post liftIsStopped : jobMovement=Movement::idle and physicalMovement=Movement::idle and jobs=Set{}
+    post doorIsClosed : doorsClosed=true
+    post engageLock : lockDoor=true
+
+context Lift::unlockDoor()
+    post disengageLock : lockDoor=false
