@@ -9,7 +9,11 @@ enum FloorButtonDirection {up, down}
 enum Movement {upward, downward, idle}
 
 class Building
+attributes
+    fireAlarm : Boolean
 operations
+    engageFireAlarm()
+    disengageFireAlarm()
 end
 
 class Floor
@@ -29,12 +33,14 @@ attributes
     physicalMovement : Movement
     jobs : Set(Floor)
     lockDoor : Boolean
+    movementLocked : Boolean
 operations
     pressLiftButton(label : String)
     openDoor()
     closeDoor()
     engageEmergencyBreak()
     unlockDoor()
+    unlockMovement()
 end
 
 -- Associations
@@ -70,30 +76,38 @@ context Lift
         not(physicalMovement=Movement::idle)implies(doorsClosed=true)
     inv lockedDoorCantOpen:
         (lockDoor)implies(doorsClosed=true)
+    inv cantMoveIfLocked:
+        (movementLocked)implies(jobMovement=Movement::idle and physicalMovement=Movement::idle and jobs=Set{})
 
 context Building
-    inv topLevelCanOnlyGoDown:
-        floorsInBuilding->forAll(floor1 : Floor |
+    inv topLevelCanOnlyGoDown :
+        floorsInBuilding->forAll(
+            floor1 : Floor |
             not(floorsInBuilding->exists(floor2 : Floor | floor2.level > floor1.level))
             implies
-            (floor1.buttons=Set{FloorButtonDirection::down}))
-    inv bottomLevelCanOnlyGoUP:
-        floorsInBuilding->forAll(floor1 : Floor |
+            (floor1.buttons=Set{FloorButtonDirection::down})
+        )
+    inv bottomLevelCanOnlyGoUP :
+        floorsInBuilding->forAll(
+            floor1 : Floor |
             not(floorsInBuilding->exists(floor2 : Floor | floor2.level < floor1.level))
             implies
-            (floor1.buttons=Set{FloorButtonDirection::up}))
-    inv middleFloorCanGoUpAndDown:
-        floorsInBuilding->forAll(floor1 : Floor |
+            (floor1.buttons=Set{FloorButtonDirection::up})
+        )
+    inv middleFloorCanGoUpAndDown :
+        floorsInBuilding->forAll(
+            floor1 : Floor |
             (floorsInBuilding->exists(floor2 : Floor | floor2.level > floor1.level)
-                and floorsInBuilding->exists(floor3 : Floor | floor3.level < floor1.level))
+                and floorsInBuilding->exists(floor3 : Floor | floor3.level < floor1.level)
+            )
             implies
-            (floor1.buttons=Set{FloorButtonDirection::down, FloorButtonDirection::up}))
+            (floor1.buttons=Set{FloorButtonDirection::down, FloorButtonDirection::up})
+        )
 
 -- TODO: what happens when you press a floor button
 -- TODO: 'tick' operation (per lift)?
 -- v nice to haves v
 -- TODO: lift failure? lift taken out of service so remove from all floors options
--- TODO: Fire alarm - same as emergency break but can open door - could do across all lifts - need a building object or something
 
 -- Methods
 
@@ -114,7 +128,8 @@ context Lift::pressLiftButton(label : String)
     post onSameLevelOpenDoors:
         ((floorOptions->exists(_floor: Floor | _floor.label=label and _floor.level = level))
             and
-            (physicalMovement=Movement::idle))
+            (physicalMovement=Movement::idle)
+        )
         implies
         (doorsClosed=false)
 
@@ -128,7 +143,30 @@ context Lift::closeDoor()
 context Lift::engageEmergencyBreak()
     post liftIsStopped : jobMovement=Movement::idle and physicalMovement=Movement::idle and jobs=Set{}
     post doorIsClosed : doorsClosed=true
-    post engageLock : lockDoor=true
+    post engageLock : lockDoor=true and movementLocked=true
 
 context Lift::unlockDoor()
     post disengageLock : lockDoor=false
+
+context Lift::unlockMovement()
+    post disengageMovementLock : movementLocked=false
+
+context Building::engageFireAlarm()
+    post fireAlarmIsOn : fireAlarm=true
+    post allLiftsNotMoving :
+        liftsInBuilding->forAll(
+            lift : Lift | lift.jobMovement=Movement::idle
+            and
+            lift.physicalMovement=Movement::idle
+            and
+            lift.jobs=Set{}
+        )
+    post allLiftDoorsOpen :
+        liftsInBuilding->forAll(lift : Lift | lift.lockDoor=false and lift.doorsClosed=false)
+    post lockLiftMovement :
+        liftsInBuilding->forAll(lift : Lift | lift.movementLocked=true)
+
+context Building::disengageFireAlarm()
+    post fireAlarmIsOff : fireAlarm=false
+    post allLiftsUnlocked :
+        liftsInBuilding->forAll(lift : Lift | lift.movementLocked=false)
