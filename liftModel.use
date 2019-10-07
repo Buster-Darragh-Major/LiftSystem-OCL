@@ -13,7 +13,7 @@ attributes
     level : Integer
     label : String
 operations
-    pressButton(direction : FloorButtonDirection)
+    pressFloorButton(direction : FloorButtonDirection)
 end
 
 class Lift
@@ -22,16 +22,11 @@ attributes
     doorsClosed : Boolean
     jobMovement: Movement
     physicalMovement: Movement
-    buttons : Set(String)
+    jobs: Set(Floor)
 operations
-    pressButton(label : String)
-end
-
--- Associations
-
-association HasJobs between
-    Lift[0..*] role liftWithJobs
-    Floor[0..*] role job
+    pressLiftButton(label : String)
+    openDoor()
+    closeDoor()
 end
 
 association CanGoToFloor between
@@ -58,7 +53,30 @@ context Lift
 -- TODO: 'tick' operation (per lift)?
 -- TODO: lift failure? lift taken out of service so remove from all floors options
 
+context Lift::pressLiftButton(label : String)
+    pre floorLabelExists: floorOptions->exists(_floor : Floor | _floor.label = label)
+    pre floorIsAboveIfUpwards:
+        (jobMovement=Movement::upward)
+        implies
+        (floorOptions->exists(_floor: Floor | _floor.label=label and _floor.level >= level))
+    pre floorIsBelowIfDownwards:
+        (jobMovement=Movement::downward)
+        implies
+        (floorOptions->exists(_floor: Floor | _floor.label=label and _floor.level <= level))
+    post addFloorToJobQueue:
+        not(floorOptions->exists(_floor: Floor | _floor.label=label and _floor.level = level))
+        implies
+        (jobs->exists(_floor : Floor | _floor.label = label and floorOptions->includes(_floor)))
+    post onSameLevelOpenDoors:
+        ((floorOptions->exists(_floor: Floor | _floor.label=label and _floor.level = level))
+            and
+            (physicalMovement=Movement::idle))
+        implies
+        (doorsClosed=false)
 
---context Lift::pressButton(label : String)
---    post floorMustExistWithLabel:
---    post inJobs: job->includes(_floor)
+context Lift::openDoor()
+    pre checkNotMoving: physicalMovement=Movement::idle
+    post openDoor: doorsClosed=false
+
+context Lift::closeDoor()
+    post openDoor: doorsClosed=true
