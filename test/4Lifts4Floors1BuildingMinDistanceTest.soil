@@ -102,3 +102,4 @@
 !Lift4.jobs := Set {Floor2}
 !destroy Lift4
 !destroy Lift3
+!destroy Lift2
