@@ -269,7 +269,7 @@ context Building::liftTick()
             ((lift.doorsClosed=true and not(lift.jobs->isEmpty()))implies(
                 ((lift.jobMovement=Movement::upward)implies(lift.level = lift@pre.level + calculatedMin and
                     ((minimumJobFloor.level=lift.level)implies(lift.doorsClosed=false and
-                        lift.jobs=lift@pre.jobs-Set{minimumJobFloor}
+                        lift.jobs=lift@pre.jobs-Set{minimumJobFloor} -- TODO: set physical movements and jobmovements if necessary
                     ))
                 ))
                 and
@@ -280,35 +280,3 @@ context Building::liftTick()
                 ))
             ))
         )
-
-context Building::minDistance() : Integer
-    post answer:
-        let minLift:Lift = liftsInBuilding->any(lift1 : Lift |
-            let closestJobDistFloor1:Integer = (lift1.jobs->any(floor1 : Floor |
-                ((lift1.jobMovement=Movement::upward)implies(not(lift1.jobs->exists(floor2 : Floor | floor1.level > floor2.level))))
-                and
-                ((lift1.jobMovement=Movement::downward)implies(not(lift1.jobs->exists(floor2 : Floor | floor1.level < floor2.level))))
-            ).level - lift1.level).abs()
-            in
-            lift1.doorsClosed=true and -- Doors must be closed to count
-            not(lift1.jobs->isEmpty()) and -- Lift must have jobs
-            closestJobDistFloor1<>0 and
-            (not(liftsInBuilding->exists(lift2 : Lift |
-                let closestJobDistFloor2:Integer = (lift2.jobs->any(floor2 : Floor |
-                    ((lift2.jobMovement=Movement::upward)implies(not(lift2.jobs->exists(floor3 : Floor | floor2.level > floor3.level))))
-                    and
-                    ((lift2.jobMovement=Movement::downward)implies(not(lift2.jobs->exists(floor3 : Floor | floor2.level < floor3.level))))
-                ).level - lift2.level).abs()
-                in
-                lift2.doorsClosed=true and -- Doors must be closed to count
-                not(lift2.jobs->isEmpty()) and -- Lift must have jobs
-                closestJobDistFloor2<>0 and
-                closestJobDistFloor2 < closestJobDistFloor1
-            )))
-        )
-        in
-        result = (minLift.jobs->any(floor1 : Floor |
-            ((minLift.jobMovement=Movement::upward)implies(not(minLift.jobs->exists(floor2 : Floor | floor1.level > floor2.level))))
-            and
-            ((minLift.jobMovement=Movement::downward)implies(not(minLift.jobs->exists(floor2 : Floor | floor1.level < floor2.level))))
-        ).level - minLift.level).abs()
