@@ -100,3 +100,5 @@
 !Lift1.jobs := Set {Floor3}
 !Lift4.level := 4
 !Lift4.jobs := Set {Floor2}
+!destroy Lift4
+!destroy Lift3

@@ -81,6 +81,7 @@ context Lift
         (lockDoor)implies(doorsClosed=true)
     inv cantMoveIfLocked:
         (movementLocked)implies(jobMovement=Movement::idle and physicalMovement=Movement::idle and jobs=Set{})
+--  TODO add invariant must have direction if job queue non empty
 
 context Building
     inv topLevelCanOnlyGoDown :
@@ -106,10 +107,6 @@ context Building
             implies
             (floor1.buttons=Set{FloorButtonDirection::down, FloorButtonDirection::up})
         )
-
--- TODO: 'tick' operation (per lift)?
--- v nice to haves v
--- TODO: lift failure? lift taken out of service so remove from all floors options
 
 ---- METHODS ----
 
@@ -230,8 +227,6 @@ context Lift::nextJob() : Floor
 
 -- Lift tick
 
--- TODO: Add individual lift tick
-
 context Building::liftTick()
     post shiftAllLifts:
         let minLift:Lift = liftsInBuilding->any(lift1 : Lift |
@@ -268,7 +263,7 @@ context Building::liftTick()
             let minimumJobFloor:Floor = lift@pre.jobs->any(floor1 : Floor | not(lift@pre.jobs->exists(floor2 : Floor | floor2.level < floor1.level))),
                 maximumJobFloor:Floor = lift@pre.jobs->any(floor1 : Floor | not(lift@pre.jobs->exists(floor2 : Floor | floor2.level > floor1.level)))
             in
-            ((lift@pre.doorsClosed=true and not(lift@pre.jobs->isEmpty()))implies(
+            ((lift@pre.doorsClosed=true)implies(
                 ((lift@pre.jobMovement=Movement::upward)implies(lift.level = lift@pre.level + calculatedMin and
                     ((minimumJobFloor.level=lift.level)implies(lift.doorsClosed=false and
                         lift.jobs=lift@pre.jobs-Set{minimumJobFloor} -- TODO: set physical movements and jobmovements if necessary
