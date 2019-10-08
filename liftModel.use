@@ -213,7 +213,8 @@ context Building::disengageFireAlarm()
 -- Lift tick
 
 context Lift::tick()
--- pre todo: doors must be closed, movement direction must be in correct direction
+    pre doorsAreClosed:
+        doorsClosed=true
     post liftHasMoved:
         let nextJob:Floor = (jobs@pre->any(floor1 : Floor |
             ((jobMovement=Movement::upward)implies(not(jobs@pre->exists(floor2 : Floor | floor1.level > floor2.level))))
