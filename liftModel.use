@@ -213,14 +213,27 @@ context Building::disengageFireAlarm()
 -- Lift tick
 
 context Lift::tick()
-    post LiftHasMoved:
-        let distanceToMove:Integer = ((jobs->any(floor1 : Floor |
-            ((jobMovement=Movement::upward)implies(not(jobs->exists(floor2 : Floor | floor1.level > floor2.level))))
+-- pre todo: doors must be closed, movement direction must be in correct direction
+    post liftHasMoved:
+        let distanceToMove:Integer = ((jobs@pre->any(floor1 : Floor |
+            ((jobMovement=Movement::upward)implies(not(jobs@pre->exists(floor2 : Floor | floor1.level > floor2.level))))
             and
-            ((jobMovement=Movement::downward)implies(not(jobs->exists(floor2 : Floor | floor1.level < floor2.level))))
+            ((jobMovement=Movement::downward)implies(not(jobs@pre->exists(floor2 : Floor | floor1.level < floor2.level))))
         )).level - (self.level@pre)).abs()
         in
-        distanceToMove=2
+        ((jobMovement=Movement::upward)implies(level = (self.level@pre) + distanceToMove)) and
+        ((jobMovement=Movement::downward)implies(level = (self.level@pre) - distanceToMove))
+    post openDoorsAndRemoveQueueAndSetMovementsIfArrived:
+        let nextJob:Floor = (jobs@pre->any(floor1 : Floor |
+            ((jobMovement=Movement::upward)implies(not(jobs@pre->exists(floor2 : Floor | floor1.level > floor2.level))))
+            and
+            ((jobMovement=Movement::downward)implies(not(jobs@pre->exists(floor2 : Floor | floor1.level < floor2.level))))
+        ))
+        in
+        ((doorsClosed@pre=true and not(jobs@pre->isEmpty()))implies(
+            doorsClosed=false and jobs=(jobs@pre)-Set{nextJob} -- todo: remove jobmovement only if queue is empty, then chec for floors with jobs
+        ))
+
 
 --context Building::liftTick()
 --    post shiftAllLifts:
