@@ -230,6 +230,8 @@ context Lift::nextJob() : Floor
 
 -- Lift tick
 
+-- TODO: Add individual lift tick
+
 context Building::liftTick()
     post shiftAllLifts:
         let minLift:Lift = liftsInBuilding->any(lift1 : Lift |
@@ -263,17 +265,17 @@ context Building::liftTick()
         ).level - minLift.level).abs()
         in
         liftsInBuilding->forAll(lift : Lift |
-            let minimumJobFloor:Floor = lift.jobs->any(floor1 : Floor | not(lift.jobs->exists(floor2 : Floor | floor2.level < floor1.level))),
-                maximumJobFloor:Floor = lift.jobs->any(floor1 : Floor | not(lift.jobs->exists(floor2 : Floor | floor2.level > floor1.level)))
+            let minimumJobFloor:Floor = lift@pre.jobs->any(floor1 : Floor | not(lift@pre.jobs->exists(floor2 : Floor | floor2.level < floor1.level))),
+                maximumJobFloor:Floor = lift@pre.jobs->any(floor1 : Floor | not(lift@pre.jobs->exists(floor2 : Floor | floor2.level > floor1.level)))
             in
-            ((lift.doorsClosed=true and not(lift.jobs->isEmpty()))implies(
-                ((lift.jobMovement=Movement::upward)implies(lift.level = lift@pre.level + calculatedMin and
+            ((lift@pre.doorsClosed=true and not(lift@pre.jobs->isEmpty()))implies(
+                ((lift@pre.jobMovement=Movement::upward)implies(lift.level = lift@pre.level + calculatedMin and
                     ((minimumJobFloor.level=lift.level)implies(lift.doorsClosed=false and
                         lift.jobs=lift@pre.jobs-Set{minimumJobFloor} -- TODO: set physical movements and jobmovements if necessary
                     ))
                 ))
                 and
-                ((lift.jobMovement=Movement::downward)implies(lift.level = lift@pre.level - calculatedMin and
+                ((lift@pre.jobMovement=Movement::downward)implies(lift.level = lift@pre.level - calculatedMin and
                     ((maximumJobFloor.level=lift.level)implies(lift.doorsClosed=false and
                         lift.jobs=lift@pre.jobs-Set{maximumJobFloor}
                     ))
