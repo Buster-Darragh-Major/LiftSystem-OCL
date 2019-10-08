@@ -12,8 +12,6 @@ class Building
 attributes
     fireAlarm : Boolean
 operations
-    minDistance() : Integer -- TODO: remove
-    liftTick()
     engageFireAlarm()
     disengageFireAlarm()
 end
