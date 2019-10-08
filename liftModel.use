@@ -215,23 +215,32 @@ context Building::disengageFireAlarm()
 context Lift::tick()
 -- pre todo: doors must be closed, movement direction must be in correct direction
     post liftHasMoved:
-        let distanceToMove:Integer = ((jobs@pre->any(floor1 : Floor |
-            ((jobMovement=Movement::upward)implies(not(jobs@pre->exists(floor2 : Floor | floor1.level > floor2.level))))
-            and
-            ((jobMovement=Movement::downward)implies(not(jobs@pre->exists(floor2 : Floor | floor1.level < floor2.level))))
-        )).level - (self.level@pre)).abs()
-        in
-        ((jobMovement=Movement::upward)implies(level = (self.level@pre) + distanceToMove)) and
-        ((jobMovement=Movement::downward)implies(level = (self.level@pre) - distanceToMove))
-    post openDoorsAndRemoveQueueAndSetMovementsIfArrived:
         let nextJob:Floor = (jobs@pre->any(floor1 : Floor |
             ((jobMovement=Movement::upward)implies(not(jobs@pre->exists(floor2 : Floor | floor1.level > floor2.level))))
             and
             ((jobMovement=Movement::downward)implies(not(jobs@pre->exists(floor2 : Floor | floor1.level < floor2.level))))
         ))
         in
+        (nextJob<>null)implies(level = nextJob.level)
+    post openDoorsAndRemoveQueueAndSetMovementsIfArrived:
+        let nextJob:Floor = (jobs@pre->any(floor1 : Floor |
+            ((jobMovement=Movement::upward)implies(not(jobs@pre->exists(floor2 : Floor | floor1.level > floor2.level))))
+            and
+            ((jobMovement=Movement::downward)implies(not(jobs@pre->exists(floor2 : Floor | floor1.level < floor2.level))))
+        )),
+            waitingListJob = (floorOptions@pre->any(_floor : Floor | _floor.waitingFor<>Movement::idle))
+        in
         ((doorsClosed@pre=true and not(jobs@pre->isEmpty()))implies(
-            doorsClosed=false and jobs=(jobs@pre)-Set{nextJob} -- todo: remove jobmovement only if queue is empty, then chec for floors with jobs
+            doorsClosed=false and
+            ((((jobs@pre)-Set{nextJob})->isEmpty())implies(
+                ((waitingListJob=null)implies(jobMovement=Movement::idle and jobs=(jobs@pre)-Set{nextJob}))
+                and
+                ((waitingListJob<>null)implies(jobMovement=waitingListJob.waitingFor@pre and
+                    jobs=Set{waitingListJob} and waitingListJob.waitingFor=Movement::idle
+                ))
+            ))
+            and
+            ((not(((jobs@pre)-Set{nextJob})->isEmpty()))implies(jobs=(jobs@pre)-Set{nextJob}))
         ))
 
 
