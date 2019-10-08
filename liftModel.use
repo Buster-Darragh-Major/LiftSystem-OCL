@@ -228,8 +228,10 @@ context Lift::nextJob() : Floor
         )->includes(result)
     )
 
+-- Lift tick
+
 context Building::liftTick()
-    post ShiftAllLifts:
+    post shiftAllLifts:
         let minLift:Lift = liftsInBuilding->any(lift1 : Lift |
             let closestJobDistFloor1:Integer = (lift1.jobs->any(floor1 : Floor |
                 ((lift1.jobMovement=Movement::upward)implies(not(lift1.jobs->exists(floor2 : Floor | floor1.level > floor2.level))))
@@ -261,7 +263,22 @@ context Building::liftTick()
         ).level - minLift.level).abs()
         in
         liftsInBuilding->forAll(lift : Lift |
-            
+            let minimumJobFloor:Floor = lift.jobs->any(floor1 : Floor | not(lift.jobs->exists(floor2 : Floor | floor2.level < floor1.level))),
+                maximumJobFloor:Floor = lift.jobs->any(floor1 : Floor | not(lift.jobs->exists(floor2 : Floor | floor2.level > floor1.level)))
+            in
+            ((lift.doorsClosed=true and not(lift.jobs->isEmpty()))implies(
+                ((lift.jobMovement=Movement::upward)implies(lift.level = lift@pre.level + calculatedMin and
+                    ((minimumJobFloor.level=lift.level)implies(lift.doorsClosed=false and
+                        lift.jobs=lift@pre.jobs-Set{minimumJobFloor}
+                    ))
+                ))
+                and
+                ((lift.jobMovement=Movement::downward)implies(lift.level = lift@pre.level - calculatedMin and
+                    ((maximumJobFloor.level=lift.level)implies(lift.doorsClosed=false and
+                        lift.jobs=lift@pre.jobs-Set{maximumJobFloor}
+                    ))
+                ))
+            ))
         )
 
 context Building::minDistance() : Integer
