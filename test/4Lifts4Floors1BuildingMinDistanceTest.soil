@@ -95,3 +95,8 @@
 !insert (Building1,Floor4) into Floors
 !insert (Building1,Floor1) into Floors
 !insert (Building1,Floor2) into Floors
+!Lift1.jobs := Set {Floor1}
+!Lift1.jobMovement := Movement::upward
+!Lift1.jobs := Set {Floor3}
+!Lift4.level := 4
+!Lift4.jobs := Set {Floor2}
