@@ -31,7 +31,7 @@
 !Floor2.label := 'G'
 !Floor2.buttons := Set {FloorButtonDirection::up,FloorButtonDirection::down}
 !Floor2.waitingFor := Movement::idle
-!Floor3.level := 2
+!Floor3.level := 3
 !Floor3.label := '1'
 !Floor3.buttons := Set {FloorButtonDirection::down}
 !Floor3.waitingFor := Movement::idle
@@ -47,8 +47,9 @@
 !Lift2.jobs := Set {}
 !Lift2.lockDoor := false
 !Lift2.movementLocked := false
-!Floor3.level := 3
 !Building1.fireAlarm := false
+
+-- Floor with lift on level has the lift get itself put on its queue, for demonstration purposes do a lift tick and show lift doors opening
 !openter Floor1 pressFloorButton(FloorButtonDirection::up)
 !Lift1.jobs := Set {Floor1}
 !opexit
@@ -56,24 +57,29 @@
 !Lift1.doorsClosed := false
 !Lift1.jobs := Set {}
 !opexit
+
+
+-- Setup a lift on level 2 and one on level 1, if floor 3 requests a lift only lift on level 2 should have its queue added to
 !Lift1.level := 2
 !openter Floor3 pressFloorButton(FloorButtonDirection::down)
 !Lift1.jobs := Set {Floor3}
 !opexit
+
+
+-- Building on previous example, not lift on level 2 is completing a job downwards so should not be called by level 3, instead level 3 job should go to lift on level 1
 !Lift1.jobMovement := Movement::downward
 !Lift1.jobs := Set {Floor1}
 !openter Floor3 pressFloorButton(FloorButtonDirection::down)
 !Lift2.jobs := Set {Floor3}
 !opexit
-!Lift1.level := 1
-!Lift1.jobMovement := Movement::idle
+
+
+-- Lift 1 is on level 3 and idle, lift 2 is on level 1 and moving upward, lift 2 requests upward, either one of lift 1 or lift 2 can be called
 !Lift1.jobs := Set {}
 !Lift1.level := 3
-!Lift1.jobMovement := Movement::upward
 !Lift1.jobMovement := Movement::idle
 !Lift2.jobMovement := Movement::upward
 !Lift1.doorsClosed := true
-!openter Floor2 pressFloorButton(FloorButtonDirection::up)
 !openter Floor2 pressFloorButton(FloorButtonDirection::up)
 !Lift1.jobs := Set {Floor2}
 !opexit
