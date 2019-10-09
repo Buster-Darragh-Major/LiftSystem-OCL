@@ -220,14 +220,14 @@ context Lift::tick()
             and
             ((jobMovement=Movement::downward)implies(not(jobs@pre->exists(floor2 : Floor | floor1.level < floor2.level))))
         )),
-            waitingListJob = (floorOptions@pre->any(_floor : Floor | _floor.waitingFor<>Movement::idle))
+            waitingListJob = (floorOptions@pre->any(_floor : Floor | (_floor.waitingFor@pre)<>Movement::idle))
         in
         ((doorsClosed@pre=true and not(jobs@pre->isEmpty()))implies(
             doorsClosed=false and
             ((((jobs@pre)-Set{nextJob})->isEmpty())implies(
                 ((waitingListJob=null)implies(jobMovement=Movement::idle and jobs=(jobs@pre)-Set{nextJob}))
                 and
-                ((waitingListJob<>null)implies(jobMovement=waitingListJob.waitingFor@pre and
+                ((waitingListJob<>null)implies(jobMovement=(waitingListJob.waitingFor@pre) and
                     jobs=Set{waitingListJob} and waitingListJob.waitingFor=Movement::idle
                 ))
             ))
