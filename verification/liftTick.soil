@@ -14,6 +14,7 @@
 !insert (Floor2,Lift1) into CanCallLift
 !insert (Floor3,Lift1) into CanCallLift
 !insert (Lift1,Floor3) into CanGoToFloor
+!insert (Building1,Lift1) into Lifts
 !Building1.fireAlarm := false
 !Floor1.level := 1
 !Floor1.label := 'G'
