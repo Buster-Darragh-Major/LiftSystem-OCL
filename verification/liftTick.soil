@@ -35,32 +35,44 @@
 !Lift1.jobMovement := Movement::idle
 !Lift1.jobs := Set {}
 !Lift1.lockDoor := false
-!Lift1.movementLocked := false
+
+-- Lift moves up 2 floors, removes job off queue, opens doors and sets movement to idle
 !Lift1.jobMovement := Movement::upward
 !Lift1.jobs := Set {Floor3}
+!Lift1.movementLocked := false
 !openter Lift1 tick()
 !Lift1.level := 3
 !Lift1.doorsClosed := false
 !Lift1.jobMovement := Movement::idle
 !Lift1.jobs := Set {}
 !opexit
+
+-- Lift moves down 2 floors with a job on each floor, removes job off queue once at a time, opens doors each time and sets movement to idle afterwards
 !Lift1.doorsClosed := true
 !Lift1.jobMovement := Movement::downward
-!Lift1.jobs := Set {Floor2}
-!openter Lift1 tick()
+!Lift1.jobs := Set {Floor1,Floor2}
 !openter Lift1 tick()
 !Lift1.level := 2
 !Lift1.doorsClosed := false
+!Lift1.jobs := Set {Floor1}
+!opexit
+!Lift1.doorsClosed := true
+!openter Lift1 tick()
+!Lift1.level := 1
+!Lift1.doorsClosed := false
 !Lift1.jobMovement := Movement::idle
 !Lift1.jobs := Set {}
 !opexit
+
+-- Lift completes s job, sees there is another floor with a job on its waitinglist so puts that floors job on its own waitinglist and sets its jobMovement accordingly.
 !Lift1.doorsClosed := true
 !Lift1.jobMovement := Movement::upward
-!Lift1.jobs := Set {Floor3}
-!Floor1.waitingFor := Movement::upward
+!Lift1.jobs := Set {Floor2}
+!Floor3.waitingFor := Movement::downward
 !openter Lift1 tick()
-!Lift1.level := 3
+!Lift1.level := 2
 !Lift1.doorsClosed := false
-!Lift1.jobs := Set {Floor1}
-!Floor1.waitingFor := Movement::idle
+!Lift1.jobMovement := Movement::downward
+!Lift1.jobs := Set {Floor3}
+!Floor3.waitingFor := Movement::idle
 !opexit
