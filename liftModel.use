@@ -103,6 +103,16 @@ context Building
             implies
             (floor1.buttons=Set{FloorButtonDirection::down, FloorButtonDirection::up})
         )
+    inv floorLabelsAreUnique :
+        floorsInBuilding->forAll(floor1 : Floor |
+            not(floorsInBuilding->exists(floor2 : Floor |
+                floor1<>floor2 and floor1.label=floor2.label
+            ))
+        )
+
+context Floor
+    inv ifIsWaitingThenNoLiftsIdle :
+        (waitingFor<>Movement::idle)implies(liftOptions->forAll(lift : Lift | not(lift.jobs->isEmpty())))
 
 ---- METHODS ----
 

@@ -12,9 +12,11 @@
 !Floor1.level := 1
 !Floor1.label := '1'
 !Floor1.buttons := Set {FloorButtonDirection::up}
+!Floor1.waitingFor := Movement::idle
 !Floor2.level := 2
 !Floor2.label := '2'
 !Floor2.buttons := Set {FloorButtonDirection::down}
+!Floor2.waitingFor := Movement::idle
 !insert (Floor1,Lift1) into CanCallLift
 !insert (Lift1,Floor1) into CanGoToFloor
 !insert (Floor2,Lift1) into CanCallLift
