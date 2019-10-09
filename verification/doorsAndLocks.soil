@@ -19,28 +19,44 @@
 !insert (Lift1,Floor1) into CanGoToFloor
 !insert (Floor2,Lift1) into CanCallLift
 !insert (Lift1,Floor2) into CanGoToFloor
+!new Building
+!Building1.fireAlarm := false
+!insert (Building1,Lift1) into Lifts
+!insert (Building1,Floor2) into Floors
+!insert (Building1,Floor1) into Floors
 
 -- Can't open lift door when locked - this should fail because pre condition
 !openter Lift1 openDoor()
 !Lift1.doorsClosed := false
 !opexit
+check
+
+-- Can't move when movement is locked - invariants should fail
+!Lift1.doorsClosed := true
+!Lift1.jobMovement := Movement::upward
+check
+!Lift1.jobMovement := Movement::idle
 
 -- Can unlock movement - this should succeed
 !openter Lift1 unlockMovement()
 !Lift1.movementLocked := false
 !opexit
+check
 
 -- Can unlock door - this should succeed
 !openter Lift1 unlockDoor()
 !Lift1.lockDoor := false
 !opexit
+check
 
 -- Can open door - this should succeed
 !openter Lift1 openDoor()
 !Lift1.doorsClosed := false
 !opexit
+check
 
 -- Can close door - this should succeed
 !openter Lift1 closeDoor()
 !Lift1.doorsClosed := true
 !opexit
+check
