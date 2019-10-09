@@ -57,6 +57,7 @@
 !Lift1.doorsClosed := false
 !Lift1.jobs := Set {}
 !opexit
+check
 
 
 -- Setup a lift on level 2 and one on level 1, if floor 3 requests a lift only lift on level 2 should have its queue added to
@@ -64,6 +65,7 @@
 !openter Floor3 pressFloorButton(FloorButtonDirection::down)
 !Lift1.jobs := Set {Floor3}
 !opexit
+check
 
 
 -- Building on previous example, not lift on level 2 is completing a job downwards so should not be called by level 3, instead level 3 job should go to lift on level 1
@@ -72,6 +74,7 @@
 !openter Floor3 pressFloorButton(FloorButtonDirection::down)
 !Lift2.jobs := Set {Floor3}
 !opexit
+check
 
 
 -- Lift 1 is on level 3 and idle, lift 2 is on level 1 and moving upward, lift 2 requests upward, either one of lift 1 or lift 2 can be called
@@ -83,6 +86,7 @@
 !openter Floor2 pressFloorButton(FloorButtonDirection::up)
 !Lift1.jobs := Set {Floor2}
 !opexit
+check
 
 
 -- In the case where no lifts are abe to server the floor the floor then puts the job request in its local job queue.
@@ -95,3 +99,4 @@
 !openter Floor2 pressFloorButton(FloorButtonDirection::up)
 !Floor2.waitingFor := Movement::upward
 !opexit
+check

@@ -47,6 +47,7 @@
 !Lift1.jobMovement := Movement::idle
 !Lift1.jobs := Set {}
 !opexit
+check
 
 
 -- Lift moves down 2 floors with a job on each floor, removes job off queue once at a time, opens doors each time and sets movement to idle afterwards
@@ -65,6 +66,7 @@
 !Lift1.jobMovement := Movement::idle
 !Lift1.jobs := Set {}
 !opexit
+check
 
 
 -- Lift completes s job, sees there is another floor with a job on its waitinglist so puts that floors job on its own waitinglist and sets its jobMovement accordingly.
@@ -79,3 +81,4 @@
 !Lift1.jobs := Set {Floor3}
 !Floor3.waitingFor := Movement::idle
 !opexit
+check
