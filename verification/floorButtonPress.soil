@@ -49,3 +49,31 @@
 !Lift2.movementLocked := false
 !Floor3.level := 3
 !Building1.fireAlarm := false
+!openter Floor1 pressFloorButton(FloorButtonDirection::up)
+!Lift1.jobs := Set {Floor1}
+!opexit
+!openter Lift1 tick()
+!Lift1.doorsClosed := false
+!Lift1.jobs := Set {}
+!opexit
+!Lift1.level := 2
+!openter Floor3 pressFloorButton(FloorButtonDirection::down)
+!Lift1.jobs := Set {Floor3}
+!opexit
+!Lift1.jobMovement := Movement::downward
+!Lift1.jobs := Set {Floor1}
+!openter Floor3 pressFloorButton(FloorButtonDirection::down)
+!Lift2.jobs := Set {Floor3}
+!opexit
+!Lift1.level := 1
+!Lift1.jobMovement := Movement::idle
+!Lift1.jobs := Set {}
+!Lift1.level := 3
+!Lift1.jobMovement := Movement::upward
+!Lift1.jobMovement := Movement::idle
+!Lift2.jobMovement := Movement::upward
+!Lift1.doorsClosed := true
+!openter Floor2 pressFloorButton(FloorButtonDirection::up)
+!openter Floor2 pressFloorButton(FloorButtonDirection::up)
+!Lift1.jobs := Set {Floor2}
+!opexit
