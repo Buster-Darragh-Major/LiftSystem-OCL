@@ -165,6 +165,7 @@ context Lift::pressLiftButton(label : String)
         (doorsClosed=false)
 
 context Lift::openDoor()
+    pre doorNotLocked: lockDoor=false
     post openDoor: doorsClosed=false
 
 context Lift::closeDoor()
