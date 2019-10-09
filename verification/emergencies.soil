@@ -52,10 +52,26 @@
 !opexit
 check
 
--- Test disengage fire alarm -
+-- Test disengage fire alarm - fire alarm is turned off and lifts are unlocked from moving
 !openter Building1 disengageFireAlarm()
 !Building1.fireAlarm := false
 !Lift1.movementLocked := false
 !Lift2.movementLocked := false
+!opexit
+check
+
+-- Test emergency break the lift must be stopped, job queue must be empty, the door must be closed and locked,
+-- and the movement should also be locked
+!Lift1.jobMovement := Movement::upward
+!Lift1.doorsClosed := true
+!Lift1.movementLocked := false
+!Lift1.lockDoor := false
+!Lift1.jobs := Set{Floor2}
+
+!openter Lift1 engageEmergencyBreak()
+!Lift1.jobMovement := Movement::idle
+!Lift1.movementLocked := true
+!Lift1.lockDoor := true
+!Lift1.jobs := Set{}
 !opexit
 check
