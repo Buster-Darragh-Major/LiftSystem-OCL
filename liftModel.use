@@ -196,6 +196,8 @@ context Building::engageFireAlarm()
         liftsInBuilding->forAll(lift : Lift | lift.lockDoor=false and lift.doorsClosed=false)
     post lockLiftMovement :
         liftsInBuilding->forAll(lift : Lift | lift.movementLocked=true)
+    post allFloorWaitingForCleared :
+        floorsInBuilding->forAll(_floor : Floor | _floor.waitingFor=Movement::idle)
 
 context Building::disengageFireAlarm()
     post fireAlarmIsOff : fireAlarm=false
