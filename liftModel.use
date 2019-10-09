@@ -111,9 +111,9 @@ context Building
 context Floor::pressFloorButton(direction : FloorButtonDirection)
     pre buttonIsOnFloor: buttons->includes(direction)
     post movingUpSoAddJobToClosestUpwardsMovingLift:
-        let shortlistLifts:Set(Lift) = (liftOptions->select(lift : Lift | lift.jobMovement=Movement::upward) -- Lifts moving up
+        let shortlistLifts:Set(Lift) = (liftOptions->select(lift : Lift | (lift.jobMovement@pre)=Movement::upward) -- Lifts moving up
                 ->intersection(liftOptions->select(lift : Lift | lift.level <= self.level))) -- Lifts below
-                ->union(liftOptions->select(lift : Lift | lift.jobMovement=Movement::idle)) -- Idle lifts
+                ->union(liftOptions->select(lift : Lift | (lift.jobMovement@pre)=Movement::idle)) -- Idle lifts
         in
         (direction=FloorButtonDirection::up)
         implies
@@ -127,9 +127,9 @@ context Floor::pressFloorButton(direction : FloorButtonDirection)
             )) and
             ((shortlistLifts->isEmpty())implies(self.waitingFor=Movement::upward))
     post movingDownSoAddJobToClosestDownwardMovingLift:
-        let shortlistLifts:Set(Lift) = (liftOptions->select(lift : Lift | lift.jobMovement=Movement::downward) -- Lifts moving down
+        let shortlistLifts:Set(Lift) = (liftOptions->select(lift : Lift | (lift.jobMovement@pre)=Movement::downward) -- Lifts moving down
                 ->intersection(liftOptions->select(lift : Lift | lift.level >= self.level))) -- Lifts above
-                ->union(liftOptions->select(lift : Lift | lift.jobMovement=Movement::idle)) -- Idle lifts
+                ->union(liftOptions->select(lift : Lift | (lift.jobMovement@pre)=Movement::idle)) -- Idle lifts
         in
         (direction=FloorButtonDirection::down)
         implies

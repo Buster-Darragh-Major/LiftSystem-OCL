@@ -50,34 +50,40 @@
 !Building1.fireAlarm := false
 
 -- Floor with lift on level has the lift get itself put on its queue, for demonstration purposes do a lift tick and show lift doors opening
+-- Removal of any actions between !openter and !opexit commands should fail post conditions or invariants
 !openter Floor1 pressFloorButton(FloorButtonDirection::up)
 !Lift1.jobs := Set {Floor1}
 !opexit
 !openter Lift1 tick()
 !Lift1.doorsClosed := false
 !Lift1.jobs := Set {}
+!Lift1.jobMovement := Movement::idle
 !opexit
 check
 
 
 -- Setup a lift on level 2 and one on level 1, if floor 3 requests a lift only lift on level 2 should have its queue added to
+-- Removal of any actions between !openter and !opexit commands should fail post conditions or invariants
 !Lift1.level := 2
 !openter Floor3 pressFloorButton(FloorButtonDirection::down)
 !Lift1.jobs := Set {Floor3}
+!Lift1.jobMovement := Movement::downward
 !opexit
 check
 
 
 -- Building on previous example, not lift on level 2 is completing a job downwards so should not be called by level 3, instead level 3 job should go to lift on level 1
-!Lift1.jobMovement := Movement::downward
+-- Removal of any actions between !openter and !opexit commands should fail post conditions or invariants
 !Lift1.jobs := Set {Floor1}
 !openter Floor3 pressFloorButton(FloorButtonDirection::down)
 !Lift2.jobs := Set {Floor3}
+!Lift2.jobMovement := Movement::downward
 !opexit
 check
 
 
 -- Lift 1 is on level 3 and idle, lift 2 is on level 1 and moving upward, lift 2 requests upward, either one of lift 1 or lift 2 can be called
+-- Removal of any actions between !openter and !opexit commands should fail post conditions or invariants
 !Lift1.jobs := Set {}
 !Lift1.level := 3
 !Lift1.jobMovement := Movement::idle
@@ -85,17 +91,19 @@ check
 !Lift1.doorsClosed := true
 !openter Floor2 pressFloorButton(FloorButtonDirection::up)
 !Lift1.jobs := Set {Floor2}
+!Lift1.jobMovement := Movement::upward
 !opexit
 check
 
 
 -- In the case where no lifts are abe to server the floor the floor then puts the job request in its local job queue.
+-- Removal of any actions between !openter and !opexit commands should fail post conditions or invariants
 !Lift1.level := 1
 !Lift1.jobMovement := Movement::downward
-!Lift1.jobs := Set {}
+!Lift1.jobs := Set {Floor1}
 !Lift2.level := 1
 !Lift2.jobMovement := Movement::downward
-!Lift2.jobs := Set {}
+!Lift2.jobs := Set {Floor1}
 !openter Floor2 pressFloorButton(FloorButtonDirection::up)
 !Floor2.waitingFor := Movement::upward
 !opexit
